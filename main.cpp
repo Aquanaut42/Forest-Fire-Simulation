@@ -2,51 +2,50 @@
 #include "window.h"
 #include "logic.h"
 
+bool paused = false;
+int simulationSpeed = 200; // Start with 200 ms per update
+
 int main(int argc, char* argv[]) {
 
     // Create the window (With the title)
-    if (!initWindow("Conway's Game of Life")) {
+    if (!initWindow("Forest Fire Simulation")) {
         std::cerr << "Failed to initialize window\n";
         return 1;
     }
 
-    world[1][1] = 1; // Example: flying cell
-    world[2][2] = 1;
-    world[2][3] = 1;
-    world[3][1] = 1;
-    world[3][2] = 1;
-
     // variables to control the start and the main loop
-    bool inStart = true;
+    bool inStart = false;
     bool running = true;
     SDL_Event event;
 
     // Main loop
     while (running) {
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {   // Exit the program
+            if (event.type == SDL_QUIT) {   
                 running = false;
             }
 
-            if (inStart) {   // Handle start input
-                handleStartInput(event);
-                if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RETURN) {
-                    inStart = false;  // Start simulation
-                }
-            }
+            // Toolbar input
+            handleToolbarInput(event);
         }
 
-        if (inStart) {   // Draw the start screen
-            drawStartScreen();
-        } else {  // Run the simulation logic
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Clear the screen
+        SDL_RenderClear(renderer);
+
+        // Draw toolbar
+        drawToolbar();
+
+        // Update simulation if not paused
+        if (!paused) {
             worldUpdate(world);
-            windowLogic(world);
-            SDL_Delay(200);
         }
 
-        // Delay to control the frame rate
-        SDL_Delay(16);
+        // Draw simulation
+        windowLogic(world);
+
+        SDL_Delay(simulationSpeed);  // Use toolbar-controlled speed
     }
+
 
     // Destroy the window
     cleanupWindow();

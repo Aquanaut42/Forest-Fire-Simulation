@@ -14,7 +14,7 @@ bool initWindow( const char* title );
 void cleanupWindow();
 void drawSquare( int x, int y );
 void windowLogic( int world[COLS][ROWS] );
-void handleStartInput(SDL_Event& e);
-void drawStartScreen();
+void handleToolbarInput(SDL_Event& e);
+void drawToolbar();
 
 #endif

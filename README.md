@@ -1,15 +1,12 @@
-# Game-of-Life
-This is Conway's Game of Life simulator, building it just to practice more complicated simulations and so i'm not following any guides, just using these 4 rules: 
-Any live cell with fewer than two live neighbours dies, as if by underpopulation.
-Any live cell with two or three live neighbours lives on to the next generation.
-Any live cell with more than three live neighbours dies, as if by overpopulation.
-Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+# Forest-Fire-Simulation
 
+This is a forest-fire simulation. Trees appear at random, grow over time, and the older they become, the more likely they are to catch fire from their neighbors. Fires can also ignite spontaneously due to random lightning strikes.
 
-To use it just run the main, then select the squares you what to turn alive, then press enter and the simulation will run
+A few parameters control the system:
 
-Todo:
-- Add a reset option
-- Add examples option
-- make screen size modifiable
-- ...
+s: rate at which new trees appear
+g: rate of tree growth
+f: rate of fire spread
+l: rate of lightning strikes
+
+w : world size w x w
