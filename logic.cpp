@@ -29,9 +29,14 @@ void worldUpdate ( int world[COLS][ROWS] ) {
 
     // Create the world copy
     int worldCopy[COLS][ROWS];
-
-    for ( int i = 0 ; i < COLS - 1 ; i++ ) {
+    for ( int i = 0 ; i < COLS - 1; i++ ) {
         for ( int j = 0 ; j < ROWS - 1 ; j++ ) {
+            worldCopy[i][j] = 0; // Initialize world copy to dirt
+        }
+    }
+
+    for ( int i = 1 ; i < COLS ; i++ ) {
+        for ( int j = 1 ; j < ROWS ; j++ ) {
             if ( world[i][j] > 100 && world[i][j] <= 110 ) {
                 // If the tree is burning, increase burning stage
                 worldCopy[i][j] = world[i][j] + 1;
@@ -66,17 +71,17 @@ void worldUpdate ( int world[COLS][ROWS] ) {
     }
     
     int fire = rand() % 101;
-    if ( fire < 10 ) {
+    if ( fire < 15 ) {
         // Randomly set a tree on fire to start the simulation
-        int x = rand() % COLS;
-        int y = rand() % ROWS;
+        int x = rand() % (COLS-1);
+        int y = rand() % (ROWS-1);
         if ( world[x][y] > 0 && world[x][y] <= 100 ) {
             worldCopy[x][y] = 101; // Set tree on fire
         }
     }
 
     // Update the world based on the rules
-    for ( int i = 0 ; i < COLS - 1 ; i++ ) {
+    for ( int i = 0 ; i < COLS - 1; i++ ) {
         for ( int j = 0 ; j < ROWS - 1 ; j++ ) {
             world[i][j] = worldCopy[i][j];
         }

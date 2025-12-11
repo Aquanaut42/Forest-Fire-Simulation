@@ -10,3 +10,8 @@ f: rate of fire spread
 l: rate of lightning strikes
 
 w : world size w x w
+
+(You can run it by running the simulation file)
+(to rebuild it run this command in the terminal in the folder
+g++ main.cpp logic.cpp window.cpp -lSDL2 -lSDL2_image -lSDL2_ttf -o simulation
+)

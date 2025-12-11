@@ -41,6 +41,14 @@ bool initWindow(const char* title) {
         return false;
     }
 
+    int worldCopy[COLS][ROWS];
+
+    for ( int i = 0 ; i < COLS ; i++ ) {
+        for ( int j = 0 ; j < ROWS ; j++ ) {
+            world[i][j] = 0; // Initialize world to dirt
+        }
+    }
+
     return true;
 }
 //===============================================
@@ -57,13 +65,15 @@ void cleanupWindow() {
 
 //===============================================
 //  This functions draws a square in the coords
-//
-//  x and y, and if the cell is alive or not
-//  (alive = 1, dead = 0)
 //===============================================
 void drawSquare(int x, int y, int state) {
+    
+    if (x * pixelSize >= WINDOW_WIDTH || y * pixelSize >= WINDOW_HEIGHT
+        || x < 0 || y < 0 ) {
+        return; // Out of bounds
+    }
     SDL_Rect rect = { x * pixelSize, y * pixelSize , pixelSize, pixelSize };
-    if (state >= 1 && state <= 100) {
+    if (state > 0 && state <= 100) {
         // Growing tree stages - shades of green
         int greenValue = 255 - (state * 100 / 100); // from 155 to 255
         SDL_SetRenderDrawColor(renderer, 34, greenValue, 34, 255);
@@ -75,7 +85,7 @@ void drawSquare(int x, int y, int state) {
         // Dirt - brown
         SDL_SetRenderDrawColor(renderer, 139, 69, 19, 255);
     }
-    //SDL_SetRenderDrawColor(renderer, 255 * state, 255 * state, 255 * state, 255);
+    
     SDL_RenderFillRect(renderer, &rect);
 }
 //===============================================
@@ -87,14 +97,11 @@ void drawSquare(int x, int y, int state) {
 //===============================================
 void windowLogic( int world[COLS][ROWS] ) {
 
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Clear with black
-    SDL_RenderClear(renderer);
-
     drawToolbar(); // draw toolbar
 
     for ( int i = 0 ; i < COLS ; i++ ) {
         for ( int j = 0 ; j < ROWS ; j++ ) {
-            if ( j * pixelSize < TOOLBAR_HEIGHT + 1 &&  j != 0 &&
+            if ( j < TOOLBAR_HEIGHT/pixelSize + 1 &&  j != 0 &&
                  i != 0 && i != WINDOW_WIDTH/pixelSize - 1 ) {
                 continue; // Skip drawing in the toolbar area
             }
@@ -110,15 +117,34 @@ void windowLogic( int world[COLS][ROWS] ) {
 //===============================================
 //  This function draws the toolbar at the top
 //===============================================
+int pauseX = 2 * pixelSize + pixelSize;
+int pauseXSize = 16 * pixelSize;
+int pauseY = 2 * pixelSize + pixelSize;
+int pauseYSize = 7 * pixelSize;
+
+int speedDownX = 19 * pixelSize + pixelSize;
+int speedDownXSize = 7 * pixelSize;
+int speedDownY = 2 * pixelSize + pixelSize;
+int speedDownYSize = 7 * pixelSize;
+
+int speedUpX = 29 * pixelSize + pixelSize;
+int speedUpXSize = 7 * pixelSize;
+int speedUpY = 2 * pixelSize + pixelSize;
+int speedUpYSize = 7 * pixelSize;
+
+int speedBarX = 27 * pixelSize + pixelSize;
+int speedBarY = 2 * pixelSize + pixelSize;
+
+
 void drawToolbar() {
     // Toolbar background 
     SDL_SetRenderDrawColor(renderer, 216, 130, 57, 255);
-    SDL_Rect toolbarRect = {0, 0, WINDOW_WIDTH, TOOLBAR_HEIGHT + pixelSize};
+    SDL_Rect toolbarRect = {pixelSize, pixelSize, WINDOW_WIDTH - 2 * pixelSize, TOOLBAR_HEIGHT};
     SDL_RenderFillRect(renderer, &toolbarRect);
 
     // Pause/play button (dark gray)
     SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
-    SDL_Rect pauseButton = {2 * pixelSize + pixelSize, 2 * pixelSize + pixelSize, 16 * pixelSize, 7 * pixelSize};
+    SDL_Rect pauseButton = {pauseX, pauseY, pauseXSize, pauseYSize};
     SDL_RenderFillRect(renderer, &pauseButton);
 
     if( paused ) {
@@ -136,15 +162,49 @@ void drawToolbar() {
         SDL_Rect rect        = {40 + pixelSize, 15 + pixelSize , pixelSize, pixelSize * 5 };
         SDL_RenderFillRect(renderer, &rect);
 
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         SDL_Rect rect2       = {50 + pixelSize, 15 + pixelSize , pixelSize, pixelSize * 5 };
         SDL_RenderFillRect(renderer, &rect2);
     }
 
     // Speed button (dark gray)
     SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
-    SDL_Rect speedButton = {100 + pixelSize, 10 + pixelSize, 16 * pixelSize, 7 * pixelSize};
-    SDL_RenderFillRect(renderer, &speedButton);
+    SDL_Rect speedButtonHalf = {speedDownX, speedDownY, speedDownXSize, speedDownYSize};
+    SDL_RenderFillRect(renderer, &speedButtonHalf);
+    // Draw half speed symbol
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_Rect h1        = {speedDownX + 3 * pixelSize , speedDownY +     pixelSize , pixelSize, pixelSize };
+    SDL_Rect h2        = {speedDownX + 2 * pixelSize , speedDownY + 5 * pixelSize , pixelSize, pixelSize };
+    SDL_Rect h3        = {speedDownX + 4 * pixelSize , speedDownY + 5 * pixelSize , pixelSize, pixelSize };
+    SDL_Rect h4        = {speedDownX +     pixelSize , speedDownY + 3 * pixelSize , 5 * pixelSize, pixelSize };
+    SDL_RenderFillRect(renderer, &h1);
+    SDL_RenderFillRect(renderer, &h2);
+    SDL_RenderFillRect(renderer, &h3);
+    SDL_RenderFillRect(renderer, &h4);
+
+    // Speed button (dark gray)
+    SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
+    SDL_Rect speedButtonTwice = {speedUpX, speedUpY, speedUpXSize, speedUpYSize};
+    SDL_RenderFillRect(renderer, &speedButtonTwice);
+    // Draw half speed symbol
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_Rect t1        = {speedUpX + 2 * pixelSize , speedUpY + 3 * pixelSize , pixelSize, pixelSize };
+    SDL_Rect t2        = {speedUpX + 4 * pixelSize , speedUpY + 3 * pixelSize , pixelSize, pixelSize };
+    SDL_RenderFillRect(renderer, &t1);
+    SDL_RenderFillRect(renderer, &t2);
+
+    // SPEED PIXEL BAR
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_Rect s1        = {speedBarX , speedBarY + 1 * pixelSize , pixelSize, pixelSize };
+    SDL_Rect s2        = {speedBarX , speedBarY + 2 * pixelSize , pixelSize, pixelSize };
+    SDL_Rect s3        = {speedBarX , speedBarY + 3 * pixelSize , pixelSize, pixelSize };
+    SDL_Rect s4        = {speedBarX , speedBarY + 4 * pixelSize , pixelSize, pixelSize };
+    SDL_Rect s5        = {speedBarX , speedBarY + 5 * pixelSize , pixelSize, pixelSize };
+    if (simulationSpeed >= 50) SDL_RenderFillRect(renderer, &s1);
+    if (simulationSpeed >= 100) SDL_RenderFillRect(renderer, &s2);
+    if (simulationSpeed >= 200) SDL_RenderFillRect(renderer, &s3);
+    if (simulationSpeed >= 400) SDL_RenderFillRect(renderer, &s4);
+    if (simulationSpeed >= 800) SDL_RenderFillRect(renderer, &s5);
+
 }
 //===============================================
 
@@ -161,10 +221,16 @@ void handleToolbarInput(SDL_Event& e) {
             paused = !paused;
         }
 
-        // Speed button
-        if (mx >= 100 + pixelSize && mx <= 180 + pixelSize && my >= 10 + pixelSize && my <= 40 + pixelSize) {
-            simulationSpeed += 50;
-            if (simulationSpeed > 1000) simulationSpeed = 50;
+        // Speed button half speed
+        if (mx >= speedDownX && mx <= speedDownX + speedDownXSize && my >= speedDownY && my <= speedDownY + speedDownYSize) {
+            simulationSpeed = simulationSpeed * 2;
+            if (simulationSpeed > 1000) simulationSpeed = 1000;
+        }
+
+        // Speed button double speed
+        if (mx >= speedUpX && mx <= speedUpX + speedUpXSize && my >= speedUpY && my <= speedUpY + speedUpYSize) {
+            simulationSpeed = simulationSpeed / 2;
+            if (simulationSpeed < 50) simulationSpeed = 50; 
         }
     }
 }

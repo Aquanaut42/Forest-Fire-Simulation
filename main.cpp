@@ -18,6 +18,11 @@ int main(int argc, char* argv[]) {
     bool running = true;
     SDL_Event event;
 
+    for ( int i = 0 ; i < COLS ; i++ ) {
+        for ( int j = 0 ; j < ROWS ; j++ ) {
+            world[i][j] = 0; // Initialize world to dirt
+        }
+    }
     // Main loop
     while (running) {
         while (SDL_PollEvent(&event)) {
@@ -28,9 +33,6 @@ int main(int argc, char* argv[]) {
             // Toolbar input
             handleToolbarInput(event);
         }
-
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Clear the screen
-        SDL_RenderClear(renderer);
 
         // Draw toolbar
         drawToolbar();
